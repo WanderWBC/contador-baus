@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Contador de Baús - Clã{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="topnav">
+    <a href="{{ url_for('ranking') }}">🏆 Ranking</a>
+    {% if is_admin or session.get('is_admin') %}
+      <a href="{{ url_for('admin_upload') }}">📤 Enviar print</a>
+      <a href="{{ url_for('admin_players') }}">👥 Jogadores</a>
+      <a href="{{ url_for('admin_points') }}">⚙️ Pontuação</a>
+      <a href="{{ url_for('logout') }}">Sair</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login admin</a>
+    {% endif %}
+  </nav>
+  <main class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

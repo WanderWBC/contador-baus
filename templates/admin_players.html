@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Jogadores do clã{% endblock %}
+{% block content %}
+  <h1>Gestão de jogadores</h1>
+
+  <form method="post">
+    <input type="hidden" name="action" value="add">
+    <label>Novo jogador: <input type="text" name="name" required></label>
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <table>
+    <thead><tr><th>Nome</th><th>Status</th><th>Ação</th></tr></thead>
+    <tbody>
+      {% for p in players %}
+      <tr>
+        <td>{{ p['name'] }}</td>
+        <td>{{ 'Ativo' if p['active'] else 'Removido' }}</td>
+        <td>
+          {% if p['active'] %}
+          <form method="post" style="display:inline">
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="player_id" value="{{ p['id'] }}">
+            <button type="submit">Remover do clã</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

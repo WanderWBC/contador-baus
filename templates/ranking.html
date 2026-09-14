@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Ranking do Clã{% endblock %}
+{% block content %}
+  <h1>Ranking de Baús do Clã</h1>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Jogador</th><th>Baús</th><th>Pontos</th></tr>
+    </thead>
+    <tbody>
+      {% for row in ranking %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><a href="{{ url_for('player_detail', player_id=row['id']) }}">{{ row['name'] }}</a></td>
+        <td>{{ row['total_baus'] }}</td>
+        <td>{{ row['total_pontos'] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">Nenhum jogador cadastrado ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Enviar print de baús{% endblock %}
+{% block content %}
+  <h1>Enviar print da tela "Baús de presente"</h1>
+  <form method="post" enctype="multipart/form-data">
+    <input type="file" name="print_baus" accept="image/*" required>
+    <button type="submit">Processar print</button>
+  </form>
+
+  {% if resultado is not none %}
+    <h2>Baús lançados neste envio</h2>
+    <table>
+      <thead><tr><th>Baú</th><th>Jogador</th><th>Fonte</th></tr></thead>
+      <tbody>
+        {% for ev in resultado %}
+        <tr><td>{{ ev.bau }}</td><td>{{ ev.jogador }}</td><td>{{ ev.fonte }}</td></tr>
+        {% else %}
+        <tr><td colspan="3">Nenhum card foi lido com confiança nessa imagem.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

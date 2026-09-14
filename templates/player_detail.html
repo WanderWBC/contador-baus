@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Detalhe do jogador{% endblock %}
+{% block content %}
+  <p><a href="{{ url_for('ranking') }}">&larr; voltar ao ranking</a></p>
+  <h1>Baús coletados</h1>
+  <table>
+    <thead><tr><th>Fonte</th><th>Qtd</th><th>Pontos/un.</th><th>Subtotal</th></tr></thead>
+    <tbody>
+      {% for row in breakdown %}
+      <tr>
+        <td>{{ row['source'] }}</td>
+        <td>{{ row['qtd'] }}</td>
+        <td>{{ row['pontos_unit'] }}</td>
+        <td>{{ row['qtd'] * row['pontos_unit'] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">Sem baús registrados ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
