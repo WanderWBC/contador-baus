@@ -13,6 +13,7 @@ body {
   flex-wrap: wrap;
 }
 .topnav a { color: #ffd28a; text-decoration: none; font-weight: 600; }
+.clan-badge { color: #f2e6d8; font-weight: 700; margin-right: auto; }
 .container { max-width: 720px; margin: 0 auto; padding: 16px; }
 h1 { color: #ffd28a; font-size: 1.4rem; }
 table { width: 100%; border-collapse: collapse; margin-top: 12px; }

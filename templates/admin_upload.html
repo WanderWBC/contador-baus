@@ -2,9 +2,11 @@
 {% block title %}Enviar print de baús{% endblock %}
 {% block content %}
   <h1>Enviar print da tela "Baús de presente"</h1>
+  <p>Pode selecionar vários prints de uma vez (segure Ctrl/Cmd pra marcar mais de um no PC,
+     ou use o seletor múltiplo do celular).</p>
   <form method="post" enctype="multipart/form-data">
-    <input type="file" name="print_baus" accept="image/*" required>
-    <button type="submit">Processar print</button>
+    <input type="file" name="print_baus" accept="image/*" multiple required>
+    <button type="submit">Processar prints</button>
   </form>
 
   {% if resultado is not none %}

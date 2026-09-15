@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Contador de Baús - Clã{% endblock %}</title>
+  <title>{% block title %}Contador de Baús - {{ clan_name }}{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <nav class="topnav">
+    <span class="clan-badge">{{ clan_name }}</span>
     <a href="{{ url_for('ranking') }}">🏆 Ranking</a>
+    <a href="{{ url_for('admin_week') }}">📅 Semanas</a>
     {% if is_admin or session.get('is_admin') %}
-      <a href="{{ url_for('admin_upload') }}">📤 Enviar print</a>
+      <a href="{{ url_for('admin_upload') }}">📤 Enviar print de baús</a>
+      <a href="{{ url_for('admin_upload_players') }}">🧑‍🤝‍🧑 Cadastrar por print</a>
       <a href="{{ url_for('admin_players') }}">👥 Jogadores</a>
       <a href="{{ url_for('admin_points') }}">⚙️ Pontuação</a>
+      <a href="{{ url_for('admin_level_goals') }}">🎯 Metas</a>
       <a href="{{ url_for('logout') }}">Sair</a>
     {% else %}
       <a href="{{ url_for('login') }}">Login admin</a>

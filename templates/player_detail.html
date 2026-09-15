@@ -2,7 +2,7 @@
 {% block title %}Detalhe do jogador{% endblock %}
 {% block content %}
   <p><a href="{{ url_for('ranking') }}">&larr; voltar ao ranking</a></p>
-  <h1>Baús coletados</h1>
+  <h1>{{ player_name }} — ciclo atual</h1>
   <table>
     <thead><tr><th>Fonte</th><th>Qtd</th><th>Pontos/un.</th><th>Subtotal</th></tr></thead>
     <tbody>
@@ -14,7 +14,23 @@
         <td>{{ row['qtd'] * row['pontos_unit'] }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="4">Sem baús registrados ainda.</td></tr>
+      <tr><td colspan="4">Sem baús registrados neste ciclo ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Histórico de ciclos anteriores</h2>
+  <table>
+    <thead><tr><th>Semana</th><th>Baús</th><th>Pontos</th></tr></thead>
+    <tbody>
+      {% for h in historico %}
+      <tr>
+        <td><a href="{{ url_for('week_detail', label=h['week_label']) }}">{{ h['week_label'] }}</a></td>
+        <td>{{ h['total_baus'] }}</td>
+        <td>{{ h['total_pontos'] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3">Ainda não há ciclos anteriores arquivados para este jogador.</td></tr>
       {% endfor %}
     </tbody>
   </table>

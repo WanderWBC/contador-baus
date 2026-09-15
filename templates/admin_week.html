@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Semanas{% endblock %}
+{% block content %}
+  <h1>Ciclos semanais</h1>
+  <p>
+    O ranking fecha sozinho: todo domingo às 14h de Brasília começa um ciclo
+    novo, e o ciclo anterior é arquivado automaticamente aqui embaixo (não
+    precisa clicar em nada).
+  </p>
+  <p>Ciclo atual em andamento, iniciado em: <strong>{{ cycle_start }}</strong> (UTC)</p>
+
+  <h2>Ciclos arquivados</h2>
+  <table>
+    <thead><tr><th>Semana (início)</th><th>Arquivada em</th><th>Exportar</th></tr></thead>
+    <tbody>
+      {% for w in weeks %}
+      <tr>
+        <td><a href="{{ url_for('week_detail', label=w['week_label']) }}">{{ w['week_label'] }}</a></td>
+        <td>{{ w['closed_at'] }}</td>
+        <td><a href="{{ url_for('export_week_csv', label=w['week_label']) }}">baixar CSV</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3">Nenhum ciclo arquivado ainda (o primeiro ciclo ainda está em andamento).</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

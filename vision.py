@@ -24,6 +24,20 @@ Se não conseguir ler algum campo com confiança, não inclua esse card no resul
 Não invente jogadores ou fontes que não estejam escritos na imagem.
 """
 
+PLAYER_LIST_PROMPT = """Você está vendo um print da tela "Meu clã" do jogo Total Battle, com a lista
+de membros do clã (cada linha tem nível, nome do jogador e poder).
+
+Extraia o NOME de todos os jogadores visíveis na imagem e devolva SOMENTE um JSON válido (sem
+markdown, sem texto antes ou depois), no formato:
+
+{
+  "jogadores": ["<nome1>", "<nome2>", "..."]
+}
+
+Ignore títulos de categoria (LÍDER, SUPERIOR, VETERANO, etc.) — eles não são nomes de jogador.
+Não invente nomes que não estejam escritos na imagem.
+"""
+
 
 def _media_type_for(path):
     ext = path.lower().rsplit(".", 1)[-1]
@@ -35,12 +49,8 @@ def _media_type_for(path):
     }.get(ext, "image/jpeg")
 
 
-def extract_chest_events(image_path):
-    """Envia uma imagem para a API da Anthropic e devolve uma lista de eventos
-    [{"bau":..., "jogador":..., "fonte":...}, ...].
-
-    Requer a variável de ambiente ANTHROPIC_API_KEY configurada (veja MANUAL.md).
-    """
+def _call_vision(image_path, prompt):
+    """Envia uma imagem + prompt para a API da Anthropic e devolve o JSON já parseado."""
     if not ANTHROPIC_API_KEY:
         raise RuntimeError(
             "ANTHROPIC_API_KEY não configurada. Defina essa variável de ambiente "
@@ -65,7 +75,7 @@ def extract_chest_events(image_path):
                             "data": img_b64,
                         },
                     },
-                    {"type": "text", "text": EXTRACTION_PROMPT},
+                    {"type": "text", "text": prompt},
                 ],
             }
         ],
@@ -87,5 +97,17 @@ def extract_chest_events(image_path):
         text = text.strip("`")
         if text.startswith("json"):
             text = text[4:]
-    parsed = json.loads(text)
+    return json.loads(text)
+
+
+def extract_chest_events(image_path):
+    """Devolve uma lista de eventos [{"bau":..., "jogador":..., "fonte":...}, ...]
+    a partir de um print da tela 'Baús de presente'."""
+    parsed = _call_vision(image_path, EXTRACTION_PROMPT)
     return parsed.get("eventos", [])
+
+
+def extract_player_names(image_path):
+    """Devolve uma lista de nomes de jogadores a partir de um print da tela 'Meu clã'."""
+    parsed = _call_vision(image_path, PLAYER_LIST_PROMPT)
+    return parsed.get("jogadores", [])

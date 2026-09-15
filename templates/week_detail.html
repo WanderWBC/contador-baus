@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Semana {{ label }}{% endblock %}
+{% block content %}
+  <p><a href="{{ url_for('admin_week') }}">&larr; voltar pras semanas</a></p>
+  <h1>Ranking da semana de {{ label }}</h1>
+  <table>
+    <thead><tr><th>#</th><th>Jogador</th><th>Baús</th><th>Pontos</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ r['player_name'] }}</td>
+        <td>{{ r['total_baus'] }}</td>
+        <td>{{ r['total_pontos'] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">Sem dados para essa semana.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

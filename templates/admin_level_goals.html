@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Metas por nível{% endblock %}
+{% block content %}
+  <h1>Meta de pontos por nível</h1>
+  <p>Cada nível de jogador (G1 a G10, Meta) tem sua própria meta de pontos por
+     ciclo. No ranking, quem bater a meta do próprio nível aparece como
+     "Concluído"; quem não bater, aparece quanto falta.</p>
+
+  <form method="post">
+    <label>Nível:
+      <select name="level" required>
+        {% for lvl in levels %}<option value="{{ lvl }}">{{ lvl }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Meta (pontos): <input type="number" name="goal_points" value="0" required></label>
+    <button type="submit">Salvar</button>
+  </form>
+
+  <table>
+    <thead><tr><th>Nível</th><th>Meta atual</th></tr></thead>
+    <tbody>
+      {% for lvl in levels %}
+      <tr><td>{{ lvl }}</td><td>{{ goals.get(lvl, '- não definida -') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

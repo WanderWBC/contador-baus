@@ -6,15 +6,33 @@
   <form method="post">
     <input type="hidden" name="action" value="add">
     <label>Novo jogador: <input type="text" name="name" required></label>
+    <label>Nível:
+      <select name="level">
+        <option value="">-</option>
+        {% for lvl in levels %}<option value="{{ lvl }}">{{ lvl }}</option>{% endfor %}
+      </select>
+    </label>
     <button type="submit">Cadastrar</button>
   </form>
 
   <table>
-    <thead><tr><th>Nome</th><th>Status</th><th>Ação</th></tr></thead>
+    <thead><tr><th>Nome</th><th>Nível</th><th>Status</th><th>Ação</th></tr></thead>
     <tbody>
       {% for p in players %}
       <tr>
         <td>{{ p['name'] }}</td>
+        <td>
+          <form method="post" style="display:inline">
+            <input type="hidden" name="action" value="set_level">
+            <input type="hidden" name="player_id" value="{{ p['id'] }}">
+            <select name="level" onchange="this.form.submit()">
+              <option value="">-</option>
+              {% for lvl in levels %}
+              <option value="{{ lvl }}" {% if p['level'] == lvl %}selected{% endif %}>{{ lvl }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
         <td>{{ 'Ativo' if p['active'] else 'Removido' }}</td>
         <td>
           {% if p['active'] %}
