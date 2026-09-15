@@ -6,7 +6,7 @@ import requests
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
-MODEL = "claude-sonnet-4-6"
+MODEL = "claude-sonnet-5"
 
 EXTRACTION_PROMPT = """Você está vendo um print da tela "Baús de presente" do jogo Total Battle.
 Cada card na lista tem: um nome de baú, uma linha "De: <jogador>" e uma linha "Fonte: <fonte>".
