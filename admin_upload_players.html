@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Cadastrar jogadores por print{% endblock %}
+{% block content %}
+  <h1>Cadastrar jogadores pelo print da tela "Meu clã"</h1>
+  <p>Use isso pra registrar jogadores que ainda não fizeram nenhum baú — sobe o
+     print da lista de membros do clã e cada nome vira um jogador cadastrado,
+     sem lançar nenhum baú. Pode selecionar vários prints de uma vez.</p>
+  <form method="post" enctype="multipart/form-data">
+    <input type="file" name="print_membros" accept="image/*" multiple required>
+    <button type="submit">Processar prints</button>
+  </form>
+
+  {% if resultado is not none %}
+    <h2>Jogadores cadastrados neste envio</h2>
+    <table>
+      <thead><tr><th>Nome</th></tr></thead>
+      <tbody>
+        {% for nome in resultado %}
+        <tr><td>{{ nome }}</td></tr>
+        {% else %}
+        <tr><td>Nenhum nome foi lido com confiança nessas imagens.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

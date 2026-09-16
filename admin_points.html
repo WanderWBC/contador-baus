@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Pontuação dos baús{% endblock %}
+{% block content %}
+  <h1>Pontuação por tipo de baú (Fonte)</h1>
+  <p>A "Fonte" é preenchida automaticamente conforme os prints são processados.
+     Defina aqui quantos pontos cada uma vale.</p>
+
+  <form method="post">
+    <label>Fonte: <input type="text" name="source" placeholder="Ex: Level 25 Citadel" required></label>
+    <label>Pontos: <input type="number" name="points" value="0" required></label>
+    <button type="submit">Salvar</button>
+  </form>
+
+  <table>
+    <thead><tr><th>Fonte</th><th>Pontos</th></tr></thead>
+    <tbody>
+      {% for row in points %}
+      <tr><td>{{ row['source'] }}</td><td>{{ row['points'] }}</td></tr>
+      {% else %}
+      <tr><td colspan="2">Nenhuma fonte configurada ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

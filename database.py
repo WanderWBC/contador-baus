@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 
 import psycopg2
@@ -8,7 +9,7 @@ from cycle import current_cycle_start, previous_cycle_bounds
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-VALID_LEVELS = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "Meta"]
+VALID_LEVELS = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10"]
 
 
 def get_db():
@@ -17,8 +18,16 @@ def get_db():
             "DATABASE_URL não configurada. Defina essa variável de ambiente com a "
             "string de conexão do seu banco Postgres (veja MANUAL.md, seção 'Banco de dados')."
         )
-    conn = psycopg2.connect(DATABASE_URL)
-    return conn
+    ultima_falha = None
+    for tentativa in range(3):
+        try:
+            return psycopg2.connect(DATABASE_URL)
+        except psycopg2.OperationalError as e:
+            ultima_falha = e
+            # o banco pode estar "acordando" de um período de inatividade -
+            # espera um pouco e tenta de novo antes de desistir
+            time.sleep(1.5 * (tentativa + 1))
+    raise ultima_falha
 
 
 def _cursor(conn):
@@ -84,25 +93,67 @@ def init_db():
     conn.close()
 
 
-def upsert_player(name):
-    """Retorna o id do jogador, criando se não existir."""
-    conn = get_db()
+def upsert_player(name, conn=None):
+    """Retorna o id do jogador, criando se não existir.
+    Se `conn` for passado, reaproveita a conexão em vez de abrir uma nova
+    (usado pelos envios em lote, pra não abrir dezenas de conexões seguidas)."""
+    own_conn = conn is None
+    if own_conn:
+        conn = get_db()
     cur = _cursor(conn)
     cur.execute("SELECT id FROM players WHERE name = %s", (name,))
     row = cur.fetchone()
     if row:
-        cur.close()
-        conn.close()
-        return row["id"]
-    cur.execute(
-        "INSERT INTO players (name, active, created_at) VALUES (%s, 1, %s) RETURNING id",
-        (name, datetime.utcnow().isoformat()),
-    )
-    pid = cur.fetchone()["id"]
-    conn.commit()
+        pid = row["id"]
+    else:
+        cur.execute(
+            "INSERT INTO players (name, active, created_at) VALUES (%s, 1, %s) RETURNING id",
+            (name, datetime.utcnow().isoformat()),
+        )
+        pid = cur.fetchone()["id"]
+        if own_conn:
+            conn.commit()
     cur.close()
-    conn.close()
+    if own_conn:
+        conn.close()
     return pid
+
+
+def add_chest_events_batch(player_names_chests, batch_id=None):
+    """Lança vários eventos de baú de uma vez usando UMA única conexão,
+    em vez de abrir/fechar conexão pra cada jogador/baú separadamente.
+
+    player_names_chests: lista de tuplas (player_name, chest_name, source)."""
+    if not player_names_chests:
+        return
+    conn = get_db()
+    now = datetime.utcnow().isoformat()
+    try:
+        for player_name, chest_name, source in player_names_chests:
+            pid = upsert_player(player_name, conn=conn)
+            cur = _cursor(conn)
+            cur.execute(
+                "INSERT INTO chest_events (player_id, chest_name, source, batch_id, created_at) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (pid, chest_name, source, batch_id, now),
+            )
+            cur.close()
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_players_batch(names):
+    """Cadastra vários jogadores de uma vez usando UMA única conexão."""
+    if not names:
+        return
+    conn = get_db()
+    try:
+        for name in names:
+            upsert_player(name, conn=conn)
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def list_players(active_only=True):

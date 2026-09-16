@@ -1,0 +1,28 @@
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+  background: #1c140d;
+  color: #f2e6d8;
+  margin: 0;
+}
+.topnav {
+  background: #3a2415;
+  padding: 12px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.topnav a { color: #ffd28a; text-decoration: none; font-weight: 600; }
+.clan-badge { color: #f2e6d8; font-weight: 700; margin-right: auto; }
+.container { max-width: 720px; margin: 0 auto; padding: 16px; }
+h1 { color: #ffd28a; font-size: 1.4rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { padding: 8px; border-bottom: 1px solid #4a3220; text-align: left; }
+th { color: #ffd28a; }
+form { margin: 16px 0; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+input, button { padding: 8px; border-radius: 6px; border: 1px solid #4a3220; }
+button {
+  background: #2d6a3e; color: white; border: none; cursor: pointer; font-weight: 600;
+}
+button:hover { background: #245532; }
+.flashes { background: #4a3220; padding: 8px 12px; border-radius: 6px; list-style: none; }

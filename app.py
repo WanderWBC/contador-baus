@@ -113,13 +113,11 @@ def admin_upload():
                 continue
 
             batch_id = uuid.uuid4().hex[:10]
-            for ev in eventos:
-                db.add_chest_event(
-                    player_name=ev.get("jogador", "").strip(),
-                    chest_name=ev.get("bau", "").strip(),
-                    source=ev.get("fonte", "").strip(),
-                    batch_id=batch_id,
-                )
+            tuplas = [
+                (ev.get("jogador", "").strip(), ev.get("bau", "").strip(), ev.get("fonte", "").strip())
+                for ev in eventos
+            ]
+            db.add_chest_events_batch(tuplas, batch_id=batch_id)
             resultado.extend(eventos)
 
             msg = montar_mensagem_destaques(eventos)
@@ -157,11 +155,9 @@ def admin_upload_players():
                 erros.append(f"{filename}: {e}")
                 continue
 
-            for nome in nomes:
-                nome = nome.strip()
-                if nome:
-                    db.upsert_player(nome)
-                    resultado.append(nome)
+            nomes_limpos = [n.strip() for n in nomes if n.strip()]
+            db.upsert_players_batch(nomes_limpos)
+            resultado.extend(nomes_limpos)
 
         if erros:
             flash("Alguns arquivos deram erro: " + " | ".join(erros))
