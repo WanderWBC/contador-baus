@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import psycopg2
 import psycopg2.extras
@@ -328,7 +328,7 @@ def get_ranking(cycle_start=None):
         LEFT JOIN level_goals lg ON lg.level = p.level
         WHERE p.active = 1
         GROUP BY p.id, p.level, lg.goal_points
-        ORDER BY total_pontos DESC, total_baus DESC
+        ORDER BY LOWER(p.name)
         """,
         (cycle_start,),
     )
@@ -464,8 +464,42 @@ def get_week_archive(week_label):
     conn = get_db()
     cur = _cursor(conn)
     cur.execute(
-        "SELECT * FROM weekly_archive WHERE week_label = %s ORDER BY total_pontos DESC",
+        "SELECT * FROM weekly_archive WHERE week_label = %s ORDER BY LOWER(player_name)",
         (week_label,),
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+
+def get_week_breakdown(week_label):
+    """Detalhamento por tipo de baú (fonte) de cada jogador dentro do ciclo
+    arquivado identificado por week_label (AAAA-MM-DD do início do ciclo).
+    Os eventos de baú brutos nunca são apagados, então isso funciona mesmo
+    para semanas já fechadas há muito tempo."""
+    from cycle import CYCLE_TZ, CYCLE_START_HOUR
+
+    start_local = datetime.strptime(week_label, "%Y-%m-%d").replace(
+        hour=CYCLE_START_HOUR, tzinfo=CYCLE_TZ
+    )
+    start = start_local.astimezone(timezone.utc)
+    end = start + timedelta(days=7)
+
+    conn = get_db()
+    cur = _cursor(conn)
+    cur.execute(
+        """
+        SELECT p.name AS player_name, ce.source, COUNT(*) AS qtd,
+               COALESCE(cp.points, 0) AS pontos_unit
+        FROM chest_events ce
+        JOIN players p ON p.id = ce.player_id
+        LEFT JOIN chest_points cp ON cp.source = ce.source
+        WHERE ce.created_at >= %s AND ce.created_at < %s
+        GROUP BY p.name, ce.source, cp.points
+        ORDER BY p.name, qtd DESC
+        """,
+        (start.isoformat(), end.isoformat()),
     )
     rows = cur.fetchall()
     cur.close()
