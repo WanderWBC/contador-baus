@@ -91,7 +91,8 @@ def admin_week():
 @app.route("/admin/semanas/<label>")
 def week_detail(label):
     rows = db.get_week_archive(label)
-    return render_template("week_detail.html", label=label, rows=rows)
+    breakdown = db.get_week_breakdown(label)
+    return render_template("week_detail.html", label=label, rows=rows, breakdown=breakdown)
 
 
 @app.route("/export/ranking.csv")
@@ -300,15 +301,18 @@ def api_upload_print():
     if file and file.filename:
         path = _save_upload(file)
     else:
-        data = request.get_json(silent=True) or {}
-        b64 = data.get("image_base64")
+        raw_body = request.get_data(as_text=True) or ""
+        b64 = raw_body.strip()
+        if not b64:
+            data = request.get_json(silent=True) or {}
+            b64 = (data.get("image_base64") or "").strip()
         if not b64:
             return jsonify({"erro": "nenhum arquivo enviado"}), 400
         try:
             image_bytes = base64.b64decode(b64)
         except Exception:
             return jsonify({"erro": "base64 inválido"}), 400
-        filename = secure_filename(data.get("filename") or "print.jpg")
+        filename = secure_filename(request.headers.get("X-Filename") or "print.jpg")
         path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}_{filename}")
         with open(path, "wb") as f:
             f.write(image_bytes)
