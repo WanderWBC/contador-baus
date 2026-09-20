@@ -15,12 +15,20 @@
         <td><a href="{{ url_for('player_detail', player_id=row['id']) }}">{{ row['name'] }}</a></td>
         <td>{{ row['level'] or '-' }}</td>
         <td>{{ row['total_baus'] }}</td>
-        <td>{{ row['total_pontos'] }}</td>
         <td>
           {% if row['status'] == 'concluido' %}
-            ✅ Concluído
+            <strong style="color: #2e7d32;">{{ row['total_pontos'] }}</strong>
           {% elif row['status'] == 'faltando' %}
-            Faltam {{ row['faltam'] }}
+            <strong style="color: #c62828;">{{ row['total_pontos'] }}</strong>
+          {% else %}
+            {{ row['total_pontos'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if row['status'] == 'concluido' %}
+            <span style="color: #2e7d32; font-weight: bold;">✅ Concluído</span>
+          {% elif row['status'] == 'faltando' %}
+            <span style="color: #c62828;">Faltam {{ row['faltam'] }}</span>
           {% else %}
             -
           {% endif %}
