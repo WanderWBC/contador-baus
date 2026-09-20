@@ -18,4 +18,28 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <h2>Detalhamento por tipo de baú</h2>
+  {% if breakdown %}
+    {% for jogador, itens in breakdown|groupby('player_name') %}
+      <h3>{{ jogador }}</h3>
+      <table>
+        <thead><tr><th>Tipo de baú (fonte)</th><th>Quantidade</th><th>Pontos cada</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          {% for item in itens %}
+          <tr>
+            <td>{{ item['source'] }}</td>
+            <td>{{ item['qtd'] }}</td>
+            <td>{{ item['pontos_unit'] }}</td>
+            <td>{{ item['qtd'] * item['pontos_unit'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  {% else %}
+    <p>Sem detalhamento disponível para essa semana.</p>
+  {% endif %}
+
+  <p><a href="{{ url_for('export_week_csv', label=label) }}">Baixar CSV desse ciclo</a></p>
 {% endblock %}
