@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import psycopg2
 import psycopg2.extras
@@ -10,6 +10,8 @@ from cycle import current_cycle_start, previous_cycle_bounds
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 VALID_LEVELS = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10"]
+
+DEDUPE_WINDOW_MINUTES = 2  # baús "repetidos" (mesmo jogador+baú+fonte) na mesma janela de tempo são ignorados
 
 
 def get_db():
@@ -225,9 +227,28 @@ def delete_player(player_id):
 
 
 def add_chest_event(player_name, chest_name, source, batch_id=None):
+    """Lança um evento de baú, ignorando duplicados recentes (mesmo jogador +
+    mesmo baú + mesma fonte em menos de DEDUPE_WINDOW_MINUTES) - protege
+    contra reenvios acidentais, como os que podem ocorrer na coleta pelo
+    celular quando a rolagem da tela não é perfeita."""
     player_id = upsert_player(player_name)
     conn = get_db()
     cur = _cursor(conn)
+
+    cutoff = (datetime.utcnow() - timedelta(minutes=DEDUPE_WINDOW_MINUTES)).isoformat()
+    cur.execute(
+        """
+        SELECT 1 FROM chest_events
+        WHERE player_id = %s AND chest_name = %s AND source = %s AND created_at >= %s
+        LIMIT 1
+        """,
+        (player_id, chest_name, source, cutoff),
+    )
+    if cur.fetchone():
+        cur.close()
+        conn.close()
+        return
+
     cur.execute(
         "INSERT INTO chest_events (player_id, chest_name, source, batch_id, created_at) "
         "VALUES (%s, %s, %s, %s, %s)",
@@ -450,6 +471,16 @@ def get_week_archive(week_label):
     cur.close()
     conn.close()
     return rows
+
+
+def get_player_by_id(player_id):
+    conn = get_db()
+    cur = _cursor(conn)
+    cur.execute("SELECT * FROM players WHERE id = %s", (player_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row
 
 
 def get_player_breakdown(player_id, cycle_start=None):
